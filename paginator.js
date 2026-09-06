@@ -22,7 +22,7 @@ class Paginator extends AbstractPaginator {
 	}
 
 	setCurrentPage($currentPage) {
-		$currentPage = $currentPage ? null : this.resolveCurrentPage();
+		$currentPage = $currentPage || this.resolveCurrentPage();
 
 		return this.isValidPageNumber($currentPage) ? parseInt($currentPage) : 1;
 	}
@@ -47,12 +47,12 @@ class Paginator extends AbstractPaginator {
 		}
 	}
 
-	links($view = null, $data = []) {
+	links($view = null, $data = {}) {
 		return this.render($view, $data);
 	}
 
 	render($view = null, $data = {}) {
-		return this.viewFactory().make($view ? null : this.$defaultSimpleView, Object.assign($data, {
+		return this.viewFactory().make($view || this.$defaultSimpleView, Object.assign($data, {
 			'paginator': this,
 		}));
 	}

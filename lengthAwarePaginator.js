@@ -1,7 +1,7 @@
 const AbstractPaginator = require('./abstractPaginator');
 const Collection = require('@ostro/support/collection')
 const UrlWindow = require('./urlWindow');
-const { is_object } = require('@ostro/support/function');
+const { is_object, rtrim } = require('@ostro/support/function');
 class LengthAwarePaginator extends AbstractPaginator {
 
 	$total;

@@ -1,5 +1,5 @@
 const querystring = require('querystring');
-const { range, is_null, is_object } = require('@ostro/support/function');
+const { range, is_null, is_object, count } = require('@ostro/support/function');
 const Collection = require('@ostro/support/collection');
 const { Macroable } = require('@ostro/support/macro');
 class AbstractPaginator extends Macroable {
@@ -12,7 +12,7 @@ class AbstractPaginator extends Macroable {
 
 	$path = '/';
 
-	$query = [];
+	$query = {};
 
 	$fragment;
 
@@ -21,6 +21,8 @@ class AbstractPaginator extends Macroable {
 	$onEachSide = 3;
 
 	$options;
+
+	$request;
 
 	$currentPathResolver;
 
@@ -130,15 +132,15 @@ class AbstractPaginator extends Macroable {
 	}
 
 	firstItem() {
-		return count(this.$items) > 0 ? (this.$currentPage - 1) * this.$perPage + 1 : null;
+		return this.count() > 0 ? (this.$currentPage - 1) * this.$perPage + 1 : null;
 	}
 
 	lastItem() {
-		return count(this.$items) > 0 ? this.firstItem() + this.count() - 1 : null;
+		return this.count() > 0 ? this.firstItem() + this.count() - 1 : null;
 	}
 
 	through($callback) {
-		this.$items.transform($callback);
+		this.$items = this.$items.map($callback);
 
 		return this;
 	}
@@ -194,12 +196,15 @@ class AbstractPaginator extends Macroable {
 	}
 
 	resolveCurrentPath($default = '/') {
-		return this.$request ? this.$request.url() : $default;
-
+		if (!this.$request) return $default;
+		if (typeof this.$request.url === 'function') return this.$request.url();
+		if (typeof this.$request.url === 'string') return this.$request.url;
+		if (typeof this.$request.path === 'function') return this.$request.path();
+		return $default;
 	}
 
 	resolveCurrentPage($pageName = 'page', $default = 1) {
-		const page = this.$request ? this.$request.input($pageName) : null;
+		const page = (this.$request && typeof this.$request.input === 'function') ? this.$request.input($pageName) : null;
 		const parsedPage = parseInt(page, 10);
 		if (!isNaN(parsedPage) && Number.isInteger(parsedPage) && parsedPage >= 1) {
 			return parsedPage;
@@ -208,7 +213,19 @@ class AbstractPaginator extends Macroable {
 	}
 
 	resolveQueryString($default = null) {
-		return this.$request ? this.$request.getQuery() : $default;
+		return (this.$request && typeof this.$request.getQuery === 'function') ? this.$request.getQuery() : $default;
+	}
+
+	viewFactory() {
+		return this.constructor.viewFactory();
+	}
+
+	get $defaultView() {
+		return this.constructor.$defaultView;
+	}
+
+	get $defaultSimpleView() {
+		return this.constructor.$defaultSimpleView;
 	}
 
 	static viewFactory() {
@@ -253,15 +270,17 @@ class AbstractPaginator extends Macroable {
 	}
 
 	getIterator() {
-		return this.$items.getIterator();
+		return typeof this.$items.getIterator === 'function'
+			? this.$items.getIterator()
+			: this.$items[Symbol.iterator]();
 	}
 
 	isEmpty() {
-		return this.$items.isEmpty();
+		return this.count() === 0;
 	}
 
 	isNotEmpty() {
-		return this.$items.isNotEmpty();
+		return this.count() > 0;
 	}
 
 	count() {
@@ -287,7 +306,8 @@ class AbstractPaginator extends Macroable {
 	}
 
 	offsetGet($key) {
-		return this.$items.get($key);
+		const val = this.$items.get($key);
+		return (val && typeof val.all === 'function') ? val.all() : val;
 	}
 
 	offsetSet($key, $value) {
@@ -295,7 +315,11 @@ class AbstractPaginator extends Macroable {
 	}
 
 	offsetUnset($key) {
-		this.$items.forget($key);
+		if (Array.isArray(this.$items.$items)) {
+			this.$items.$items.splice($key, 1);
+		} else {
+			delete this.$items[$key];
+		}
 	}
 
 	toHtml() {
