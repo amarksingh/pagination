@@ -3,7 +3,7 @@
   "version": "1.0.7",
   "description": "Pagination module for OstroJS",
   "scripts": {
-    "test": "NODE_PATH=../foundation/node_modules npx jest"
+    "test": "npx c8 npx jest"
   },
   "dependencies": {
     "@ostro/support": "^1.0.12"
