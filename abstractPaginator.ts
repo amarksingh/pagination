@@ -2,7 +2,27 @@ const querystring = require('querystring');
 const { range, is_null, is_object, count } = require('@ostro/support/function');
 const Collection = require('@ostro/support/collection');
 const { Macroable } = require('@ostro/support/macro');
-class AbstractPaginator extends Macroable {
+interface IPaginator<T = any> {
+	items(): T[];
+	count(): number;
+	currentPage(): number;
+	perPage(): number;
+	hasPages(): boolean;
+	hasMorePages(): boolean;
+	path(): string;
+	url(page: number): string;
+	fragment(fragment?: string): this | string | null;
+	appends(key: any, value?: any): this;
+}
+
+interface ILengthAwarePaginator<T = any> extends IPaginator<T> {
+	total(): number;
+	lastPage(): number;
+	firstItem(): number | null;
+	lastItem(): number | null;
+}
+
+class AbstractPaginator extends Macroable implements IPaginator {
 
 	/**
 	 * $items property.
@@ -700,4 +720,5 @@ class AbstractPaginator extends Macroable {
 		return String(this.render());
 	}
 }
-module.exports = AbstractPaginator
+export type { IPaginator, ILengthAwarePaginator };
+module.exports = AbstractPaginator;
