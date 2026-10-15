@@ -1,9 +1,9 @@
-require('@ostro/support/helpers');
-const AbstractPaginator = require('../abstractPaginator');
-const LengthAwarePaginator = require('../lengthAwarePaginator');
-const Paginator = require('../paginator');
-const UrlWindow = require('../urlWindow');
-const Collection = require('@ostro/support/collection');
+import '@ostro/support/helpers';
+import AbstractPaginator from '../abstractPaginator';
+import LengthAwarePaginator from '../lengthAwarePaginator';
+import Paginator from '../paginator';
+import UrlWindow from '../urlWindow';
+import Collection from '@ostro/support/collection';
 
 describe('@ostro/pagination', () => {
     let mockViewFactory;

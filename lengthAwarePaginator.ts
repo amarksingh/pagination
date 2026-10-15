@@ -1,81 +1,91 @@
-const AbstractPaginator = require('./abstractPaginator');
-const Collection = require('@ostro/support/collection')
-const UrlWindow = require('./urlWindow');
-const { is_object, rtrim } = require('@ostro/support/function');
-class LengthAwarePaginator extends AbstractPaginator {
+import AbstractPaginator from './abstractPaginator';
+import Collection from '@ostro/support/collection';
+import UrlWindow from './urlWindow';
+import { is_object, rtrim } from '@ostro/support/function';
+
+/**
+ * LengthAwarePaginator providing full pagination info with total count and page range calculations.
+ *
+ * @typeParam T - Type of items being paginated.
+ */
+class LengthAwarePaginator<T = unknown> extends AbstractPaginator<T> implements AbstractPaginator.ILengthAwarePaginator<T> {
 
 	/**
-	 * $total property.
-	 * @type {any}
+	 * Total number of items in the data source.
 	 */
-	$total;
+	$total: number;
 
 	/**
-	 * $lastPage property.
-	 * @type {any}
+	 * Last available page number.
 	 */
-	$lastPage;
+	$lastPage: number;
 
 	/**
-	 * constructor method.
+	 * Create a new length-aware paginator instance.
 	 *
-	 * @param {any} items
-	 * @param {any} total
-	 * @param {any} perPage
-	 * @param {any} currentPage
-	 * @param {any} options
-	 * @param {any} request
-	 * @returns {any}
+	 * @param items - Paginated items array or Collection.
+	 * @param total - Total item count.
+	 * @param perPage - Items per page.
+	 * @param currentPage - Current page number.
+	 * @param options - Paginator options.
+	 * @param request - Request instance.
 	 */
-	constructor($items: any[], $total: number, $perPage: number, $currentPage: any = null, $options: Record<string, any> = {}, $request: Record<string, any> = {}) {
+	constructor(
+		$items: any[] | Collection<T>,
+		$total: number,
+		$perPage: number,
+		$currentPage: any = null,
+		$options: Record<string, any> = {},
+		$request: Record<string, any> = {}
+	) {
 		super();
 		this.$options = $options;
 		this.$request = $request;
 
-		for (let $key in $options) {
-			this[$key] = $options[$key];
+		for (const $key in $options) {
+			(this as any)[$key] = $options[$key];
 		}
 
 		this.$total = $total;
-		this.$perPage = parseInt($perPage);
-		this.$lastPage = Math.max(parseInt(Math.ceil($total / $perPage)), 1);
+		this.$perPage = parseInt($perPage as any, 10);
+		this.$lastPage = Math.max(parseInt(Math.ceil($total / $perPage) as any, 10), 1);
 		this.$path = this.$path !== '/' ? rtrim(this.$path, '/') : this.$path;
 		this.$currentPage = this.setCurrentPage($currentPage, this.$pageName);
 		this.$items = $items instanceof Collection ? $items : Collection.make($items);
 	}
 
 	/**
-	 * setCurrentPage method.
+	 * Set the current page.
 	 *
-	 * @param {any} currentPage
-	 * @param {any} pageName
-	 * @returns {any}
+	 * @param currentPage - Current page number or null.
+	 * @param pageName - Page parameter name.
+	 * @returns Validated page number.
 	 */
-	setCurrentPage($currentPage: any, $pageName: any) {
+	setCurrentPage($currentPage: any, $pageName: string): number {
 		$currentPage = $currentPage || this.resolveCurrentPage($pageName);
 
-		return this.isValidPageNumber($currentPage) ? parseInt($currentPage) : 1;
+		return this.isValidPageNumber($currentPage) ? parseInt($currentPage, 10) : 1;
 	}
 
 	/**
-	 * links method.
+	 * Render the paginator using the given view.
 	 *
-	 * @param {any} view
-	 * @param {any} data
-	 * @returns {any}
+	 * @param view - View template name.
+	 * @param data - View context data.
+	 * @returns Rendered view.
 	 */
-	links($view: any = null, $data: Record<string, any> = {}) {
+	links($view: string | null = null, $data: Record<string, any> = {}): any {
 		return this.render($view, $data);
 	}
 
 	/**
-	 * render method.
+	 * Render the paginator using the given view.
 	 *
-	 * @param {any} view
-	 * @param {any} data
-	 * @returns {any}
+	 * @param view - View template name.
+	 * @param data - View context data.
+	 * @returns Rendered view.
 	 */
-	render($view: any = null, $data: Record<string, any> = {}) {
+	render($view: string | null = null, $data: Record<string, any> = {}): any {
 		return this.viewFactory().make($view || this.$defaultView, Object.assign($data, {
 			'paginator': this,
 			'elements': this.elements(),
@@ -83,26 +93,22 @@ class LengthAwarePaginator extends AbstractPaginator {
 	}
 
 	/**
-	 * linkCollection method.
+	 * Get the array of elements to be represented on the pager.
 	 *
-	 * @returns {any}
+	 * @returns Collection of link objects.
 	 */
-	linkCollection() {
-		return new Collection(this.elements()).flatMap(($item) => {
+	linkCollection(): Collection<Record<string, any>> {
+		return new Collection(this.elements()).flatMap(($item: any) => {
 			if (typeof ($item) != 'object') {
 				return [{ 'url': null, 'label': '...', 'active': false }];
 			}
-			let pages = [];
+			const pages: any[] = [];
 			for (let $page in $item) {
-				/**
-				 * $page property.
-				 * @type {any}
-				 */
-				$page = parseInt($page);
+				const pageNum: number = parseInt($page, 10);
 				pages.push({
 					'url': $item[$page],
-					'label': String($page),
-					'active': this.currentPage() === $page,
+					'label': String(pageNum),
+					'active': this.currentPage() === pageNum,
 				});
 			}
 			return pages;
@@ -114,15 +120,15 @@ class LengthAwarePaginator extends AbstractPaginator {
 			'url': this.nextPageUrl(),
 			'label': 'Next',
 			'active': false,
-		});
+		}) as Collection<Record<string, any>>;
 	}
 
 	/**
-	 * elements method.
+	 * Get the array of elements to be represented on the pager.
 	 *
-	 * @returns {any}
+	 * @returns Array of page URL ranges and dividers.
 	 */
-	elements() {
+	elements(): any[] {
 		const window = UrlWindow.make(this);
 
 		return [
@@ -133,69 +139,69 @@ class LengthAwarePaginator extends AbstractPaginator {
 	}
 
 	/**
-	 * total method.
+	 * Get the total number of items being paginated.
 	 *
-	 * @returns {any}
+	 * @returns Total count.
 	 */
-	total() {
+	total(): number {
 		return this.$total;
 	}
 
 	/**
-	 * hasMorePages method.
+	 * Determine if there are more items in the data source.
 	 *
-	 * @returns {any}
+	 * @returns True if more pages exist.
 	 */
-	hasMorePages() {
+	hasMorePages(): boolean {
 		return this.currentPage() < this.lastPage();
 	}
 
 	/**
-	 * nextPageUrl method.
+	 * Get the URL for the next page.
 	 *
-	 * @returns {any}
+	 * @returns Next page URL or undefined.
 	 */
-	nextPageUrl() {
+	nextPageUrl(): string | undefined {
 		if (this.hasMorePages()) {
 			return this.url(this.currentPage() + 1);
 		}
 	}
 
 	/**
-	 * nextPage method.
+	 * Get the next page number.
 	 *
-	 * @returns {any}
+	 * @returns Next page number or undefined.
 	 */
-	nextPage() {
+	nextPage(): number | undefined {
 		if (this.hasMorePages()) {
 			return this.currentPage() + 1;
 		}
 	}
 
 	/**
-	 * lastPage method.
+	 * Get the last page number.
 	 *
-	 * @returns {any}
+	 * @returns Last page number.
 	 */
-	lastPage() {
+	lastPage(): number {
 		return this.$lastPage;
 	}
 
 	/**
-	 * toJSON method.
+	 * Convert the object into something JSON serializable.
 	 *
-	 * @returns {any}
+	 * @returns Serialized paginator object.
 	 */
-	toJSON() {
+	toJSON(): Record<string, any> {
 		return this.toJson();
 	}
 
 	/**
-	 * toJson method.
+	 * Get the instance as an array/JSON dictionary.
 	 *
-	 * @returns {any}
+	 * @returns Serialized paginator dictionary.
 	 */
-	toJson() {
+	toJson(): Record<string, any> {
 		return {
 			'current_page': this.currentPage(),
 			'data': this.$items.toArray(),
@@ -214,14 +220,14 @@ class LengthAwarePaginator extends AbstractPaginator {
 	}
 
 	/**
-	 * jsonSerialize method.
+	 * Convert the object into something JSON serializable.
 	 *
-	 * @returns {any}
+	 * @returns Serialized paginator dictionary.
 	 */
-	jsonSerialize() {
+	jsonSerialize(): Record<string, any> {
 		return this.toJson();
 	}
 
 }
 
-module.exports = LengthAwarePaginator
+export = LengthAwarePaginator;

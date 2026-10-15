@@ -1,40 +1,39 @@
-
+/**
+ * Window slider calculation utility for rendering pagination links.
+ */
 class UrlWindow {
 
 	/**
-	 * $paginator property.
-	 * @type {any}
+	 * Paginator instance.
 	 */
-	$paginator;
+	$paginator: any;
 
 	/**
-	 * constructor method.
+	 * Create a new URL window instance.
 	 *
-	 * @param {any} paginator
-	 * @returns {any}
+	 * @param paginator - Paginator instance.
 	 */
 	constructor($paginator: any) {
 		this.$paginator = $paginator;
 	}
 
 	/**
-	 * make method.
+	 * Create a new slider for the paginator.
 	 *
-	 * @static
-	 * @param {any} paginator
-	 * @returns {any}
+	 * @param paginator - Paginator instance.
+	 * @returns Generated slider windows.
 	 */
-	static make($paginator: any) {
+	static make($paginator: any): Record<string, any> {
 		return (new this($paginator)).get();
 	}
 
 	/**
-	 * get method.
+	 * Get the window of URLs to be shown.
 	 *
-	 * @returns {any}
+	 * @returns Slider window dictionary.
 	 */
-	get() {
-		const $onEachSide = this.$paginator.$onEachSide;
+	get(): Record<string, any> {
+		const $onEachSide: number = this.$paginator.$onEachSide;
 
 		if (this.$paginator.lastPage() < ($onEachSide * 2) + 8) {
 			return this.getSmallSlider();
@@ -44,11 +43,11 @@ class UrlWindow {
 	}
 
 	/**
-	 * getSmallSlider method.
+	 * Get the slider of URLs there are too not enough pages to slide.
 	 *
-	 * @returns {any}
+	 * @returns Slider dictionary.
 	 */
-	getSmallSlider() {
+	getSmallSlider(): Record<string, any> {
 		return {
 			'first': this.$paginator.getUrlRange(1, this.lastPage()),
 			'slider': null,
@@ -57,24 +56,21 @@ class UrlWindow {
 	}
 
 	/**
-	 * getUrlSlider method.
+	 * Create a URL slider.
 	 *
-	 * @param {any} onEachSide
-	 * @returns {any}
+	 * @param onEachSide - Links to show on each side.
+	 * @returns Slider window dictionary.
 	 */
-	getUrlSlider($onEachSide: any) {
-		const $window = $onEachSide + 4;
+	getUrlSlider($onEachSide: number): Record<string, any> {
+		const $window: number = $onEachSide + 4;
 
 		if (!this.hasPages()) {
 			return { 'first': null, 'slider': null, 'last': null };
 		}
 
-
 		if (this.currentPage() <= $window) {
 			return this.getSliderTooCloseToBeginning($window, $onEachSide);
-		}
-
-		else if (this.currentPage() > (this.lastPage() - $window)) {
+		} else if (this.currentPage() > (this.lastPage() - $window)) {
 			return this.getSliderTooCloseToEnding($window, $onEachSide);
 		}
 
@@ -82,13 +78,13 @@ class UrlWindow {
 	}
 
 	/**
-	 * getSliderTooCloseToBeginning method.
+	 * Get the slider of URLs when too close to the beginning of window.
 	 *
-	 * @param {any} window
-	 * @param {any} onEachSide
-	 * @returns {any}
+	 * @param window - Window boundary.
+	 * @param onEachSide - Links to show on each side.
+	 * @returns Slider dictionary.
 	 */
-	getSliderTooCloseToBeginning($window: any, $onEachSide: any) {
+	getSliderTooCloseToBeginning($window: number, $onEachSide: number): Record<string, any> {
 		return {
 			'first': this.$paginator.getUrlRange(1, $window + $onEachSide),
 			'slider': null,
@@ -97,14 +93,14 @@ class UrlWindow {
 	}
 
 	/**
-	 * getSliderTooCloseToEnding method.
+	 * Get the slider of URLs when too close to the ending of window.
 	 *
-	 * @param {any} window
-	 * @param {any} onEachSide
-	 * @returns {any}
+	 * @param window - Window boundary.
+	 * @param onEachSide - Links to show on each side.
+	 * @returns Slider dictionary.
 	 */
-	getSliderTooCloseToEnding($window: any, $onEachSide: any) {
-		const $last = this.$paginator.getUrlRange(
+	getSliderTooCloseToEnding($window: number, $onEachSide: number): Record<string, any> {
+		const $last: Record<number, string> = this.$paginator.getUrlRange(
 			this.lastPage() - ($window + ($onEachSide - 1)),
 			this.lastPage()
 		);
@@ -117,12 +113,12 @@ class UrlWindow {
 	}
 
 	/**
-	 * getFullSlider method.
+	 * Get the slider of URLs when in middle of the window.
 	 *
-	 * @param {any} onEachSide
-	 * @returns {any}
+	 * @param onEachSide - Links to show on each side.
+	 * @returns Slider dictionary.
 	 */
-	getFullSlider($onEachSide: any) {
+	getFullSlider($onEachSide: number): Record<string, any> {
 		return {
 			'first': this.getStart(),
 			'slider': this.getAdjacentUrlRange($onEachSide),
@@ -131,12 +127,12 @@ class UrlWindow {
 	}
 
 	/**
-	 * getAdjacentUrlRange method.
+	 * Get the page range for the current page window.
 	 *
-	 * @param {any} onEachSide
-	 * @returns {any}
+	 * @param onEachSide - Links to show on each side.
+	 * @returns Dictionary of page numbers to URLs.
 	 */
-	getAdjacentUrlRange($onEachSide: any) {
+	getAdjacentUrlRange($onEachSide: number): Record<number, string> {
 		return this.$paginator.getUrlRange(
 			this.currentPage() - $onEachSide,
 			this.currentPage() + $onEachSide
@@ -144,21 +140,20 @@ class UrlWindow {
 	}
 
 	/**
-	 * getStart method.
+	 * Get the starting URLs of a pagination slider.
 	 *
-	 * @returns {any}
+	 * @returns Starting page URLs.
 	 */
-	getStart() {
+	getStart(): Record<number, string> {
 		return this.$paginator.getUrlRange(1, 2);
 	}
 
-
 	/**
-	 * getFinish method.
+	 * Get the ending URLs of a pagination slider.
 	 *
-	 * @returns {any}
+	 * @returns Ending page URLs.
 	 */
-	getFinish() {
+	getFinish(): Record<number, string> {
 		return this.$paginator.getUrlRange(
 			this.lastPage() - 1,
 			this.lastPage()
@@ -166,30 +161,31 @@ class UrlWindow {
 	}
 
 	/**
-	 * hasPages method.
+	 * Determine if the underlying paginator being presented has pages to show.
 	 *
-	 * @returns {any}
+	 * @returns True if more than 1 page.
 	 */
-	hasPages() {
+	hasPages(): boolean {
 		return this.$paginator.lastPage() > 1;
 	}
 
 	/**
-	 * currentPage method.
+	 * Get the current page from the paginator.
 	 *
-	 * @returns {any}
+	 * @returns Current page number.
 	 */
-	currentPage() {
+	currentPage(): number {
 		return this.$paginator.currentPage();
 	}
 
 	/**
-	 * lastPage method.
+	 * Get the last page from the paginator.
 	 *
-	 * @returns {any}
+	 * @returns Last page number.
 	 */
-	lastPage() {
+	lastPage(): number {
 		return this.$paginator.lastPage();
 	}
 }
-module.exports = UrlWindow;
+
+export = UrlWindow;

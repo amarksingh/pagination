@@ -1,8 +1,9 @@
-const querystring = require('querystring');
-const { range, is_null, is_object, count } = require('@ostro/support/function');
-const Collection = require('@ostro/support/collection');
-const { Macroable } = require('@ostro/support/macro');
-interface IPaginator<T = any> {
+import querystring from 'querystring';
+import { count, is_null, is_object, range } from '@ostro/support/function';
+import Collection from '@ostro/support/collection';
+import { Macroable } from '@ostro/support/macro';
+
+interface IPaginator<T = unknown> {
 	items(): T[];
 	count(): number;
 	currentPage(): number;
@@ -11,149 +12,153 @@ interface IPaginator<T = any> {
 	hasMorePages(): boolean;
 	path(): string;
 	url(page: number): string;
-	fragment(fragment?: string): this | string | null;
+	fragment(fragment?: string): this | string | null | undefined;
 	appends(key: any, value?: any): this;
 }
 
-interface ILengthAwarePaginator<T = any> extends IPaginator<T> {
+interface ILengthAwarePaginator<T = unknown> extends IPaginator<T> {
 	total(): number;
 	lastPage(): number;
 	firstItem(): number | null;
 	lastItem(): number | null;
 }
 
-class AbstractPaginator extends Macroable implements IPaginator {
+/**
+ * Abstract base class providing core pagination mechanics.
+ *
+ * @typeParam T - Type of items being paginated.
+ */
+class AbstractPaginator<T = unknown> extends Macroable implements IPaginator<T> {
 
 	/**
-	 * $items property.
-	 * @type {any}
+	 * Collection of items being paginated.
 	 */
-	$items;
+	$items!: Collection<T>;
 
 	/**
-	 * $perPage property.
-	 * @type {any}
+	 * Number of items to be shown per page.
 	 */
-	$perPage;
+	$perPage!: number;
 
 	/**
-	 * $currentPage property.
-	 * @type {any}
+	 * Current page number.
 	 */
-	$currentPage;
+	$currentPage!: number;
 
 	/**
-	 * $path property.
-	 * @type {any}
+	 * Base path for generated page URLs.
 	 */
-	$path = '/';
+	$path: string = '/';
 
 	/**
-	 * $query property.
-	 * @type {any}
+	 * Query string parameters to append to URLs.
 	 */
-	$query = {};
+	$query: Record<string, any> = {};
 
 	/**
-	 * $fragment property.
-	 * @type {any}
+	 * URL fragment to append to URLs.
 	 */
-	$fragment;
+	$fragment?: string | null;
 
 	/**
-	 * $pageName property.
-	 * @type {any}
+	 * Query string variable used to store the page number.
 	 */
-	$pageName = 'page';
+	$pageName: string = 'page';
 
 	/**
-	 * $onEachSide property.
-	 * @type {any}
+	 * Number of page links to display on each side of the current page.
 	 */
-	$onEachSide = 3;
+	$onEachSide: number = 3;
 
 	/**
-	 * $options property.
-	 * @type {any}
+	 * Options dictionary passed to the paginator.
 	 */
-	$options;
+	$options?: Record<string, any>;
 
 	/**
-	 * $request property.
-	 * @type {any}
+	 * Incoming HTTP request instance.
 	 */
-	$request;
+	$request?: any;
 
 	/**
-	 * $currentPathResolver property.
-	 * @type {any}
+	 * Custom current path resolver callback.
 	 */
-	$currentPathResolver;
+	$currentPathResolver?: () => string;
 
 	/**
-	 * $currentPageResolver property.
-	 * @type {any}
+	 * Custom current page resolver callback.
 	 */
-	$currentPageResolver;
+	$currentPageResolver?: () => number;
 
 	/**
-	 * $queryStringResolver property.
-	 * @type {any}
+	 * Custom query string resolver callback.
 	 */
-	$queryStringResolver;
-
-	static $viewFactoryResolver;
-
-	static $defaultView = 'pagination::tailwind';
-
-	static $defaultSimpleView = 'pagination::simple-tailwind';
+	$queryStringResolver?: () => any;
 
 	/**
-	 * isValidPageNumber method.
+	 * Resolver function for obtaining the view factory instance.
+	 */
+	static $viewFactoryResolver?: () => any;
+
+	/**
+	 * Default view name for standard pagination.
+	 */
+	static $defaultView: string = 'pagination::tailwind';
+
+	/**
+	 * Default view name for simple pagination.
+	 */
+	static $defaultSimpleView: string = 'pagination::simple-tailwind';
+
+	declare hasMorePages: () => boolean;
+	declare render: ($view?: string | null, $data?: Record<string, any>) => any;
+
+	/**
+	 * Determine if the given value is a valid page number.
 	 *
-	 * @param {any} page
-	 * @returns {any}
+	 * @param page - Page number to validate.
+	 * @returns True if valid integer >= 1.
 	 */
-	isValidPageNumber($page: number) {
-		return $page >= 1 && Number.isInteger(parseInt($page)) !== false;
+	isValidPageNumber($page: any): boolean {
+		return $page >= 1 && Number.isInteger(parseInt($page, 10)) !== false;
 	}
 
 	/**
-	 * previousPageUrl method.
+	 * Get the URL for the previous page.
 	 *
-	 * @returns {any}
+	 * @returns Previous page URL, or undefined if on the first page.
 	 */
-	previousPageUrl() {
+	previousPageUrl(): string | undefined {
 		if (this.currentPage() > 1) {
 			return this.url(this.currentPage() - 1);
 		}
 	}
 
 	/**
-	 * getUrlRange method.
+	 * Create a range of page URLs.
 	 *
-	 * @param {any} start
-	 * @param {any} end
-	 * @returns {any}
+	 * @param start - Starting page number.
+	 * @param end - Ending page number.
+	 * @returns Dictionary of page numbers to URLs.
 	 */
-	getUrlRange($start: any, $end: any) {
-		return new Collection(range($start, $end)).mapWithKeys(($page) => {
+	getUrlRange($start: number, $end: number): Record<number, string> {
+		return new Collection(range($start, $end)).mapWithKeys(($page: number) => {
 			return [$page, this.url($page)];
-		}).all();
+		}).all() as Record<number, string>;
 	}
 
 	/**
-	 * url method.
+	 * Get the URL for a given page number.
 	 *
-	 * @param {any} page
-	 * @returns {any}
+	 * @param page - Page number.
+	 * @returns Formatted URL.
 	 */
-	url($page: number) {
+	url($page: number): string {
 		if ($page <= 0) {
 			$page = 1;
 		}
 
-		const $parameters = { [this.$pageName]: $page };
+		const $parameters: Record<string, any> = { [this.$pageName]: $page };
 
 		if (count(this.$query) > 0) {
 			Object.assign($parameters, this.$query);
@@ -166,12 +171,12 @@ class AbstractPaginator extends Macroable implements IPaginator {
 	}
 
 	/**
-	 * fragment method.
+	 * Get or set the URL fragment.
 	 *
-	 * @param {any} fragment
-	 * @returns {any}
+	 * @param fragment - Optional fragment anchor.
+	 * @returns Fragment string, or self for chaining.
 	 */
-	fragment($fragment: any = null) {
+	fragment($fragment: string | null = null): this | string | null | undefined {
 		if (is_null($fragment)) {
 			return this.$fragment;
 		}
@@ -182,13 +187,13 @@ class AbstractPaginator extends Macroable implements IPaginator {
 	}
 
 	/**
-	 * appends method.
+	 * Add a set of query string values to the paginator.
 	 *
-	 * @param {any} key
-	 * @param {any} value
-	 * @returns {any}
+	 * @param key - Query parameter key or key-value object.
+	 * @param value - Query parameter value.
+	 * @returns Fluent self instance.
 	 */
-	appends($key: string, $value: any = null) {
+	appends($key: any, $value: any = null): this {
 		if (is_null($key)) {
 			return this;
 		}
@@ -201,12 +206,12 @@ class AbstractPaginator extends Macroable implements IPaginator {
 	}
 
 	/**
-	 * appendObject method.
+	 * Add an array of query string values.
 	 *
-	 * @param {any} keys
-	 * @returns {any}
+	 * @param keys - Dictionary of query parameters.
+	 * @returns Fluent self instance.
 	 */
-	appendObject($keys: Record<string, any> = {}) {
+	appendObject($keys: Record<string, any> = {}): this {
 		for (const key in $keys) {
 			this.addQuery(key, $keys[key]);
 		}
@@ -215,22 +220,22 @@ class AbstractPaginator extends Macroable implements IPaginator {
 	}
 
 	/**
-	 * withQueryString method.
+	 * Add all current query string values to the paginator.
 	 *
-	 * @returns {any}
+	 * @returns Fluent self instance.
 	 */
-	withQueryString() {
+	withQueryString(): this {
 		return this.appends(this.resolveQueryString());
 	}
 
 	/**
-	 * addQuery method.
+	 * Add a query string value to the paginator.
 	 *
-	 * @param {any} key
-	 * @param {any} value
-	 * @returns {any}
+	 * @param key - Query parameter key.
+	 * @param value - Query parameter value.
+	 * @returns Fluent self instance.
 	 */
-	addQuery($key: string, $value: any) {
+	addQuery($key: string, $value: any): this {
 		if ($key !== this.$pageName) {
 			this.$query[$key] = $value;
 		}
@@ -239,195 +244,195 @@ class AbstractPaginator extends Macroable implements IPaginator {
 	}
 
 	/**
-	 * buildFragment method.
+	 * Build the full fragment portion of a URL.
 	 *
-	 * @returns {any}
+	 * @returns Formatted fragment with '#' or empty string.
 	 */
-	buildFragment() {
+	buildFragment(): string {
 		return this.$fragment ? '#' + this.$fragment : '';
 	}
 
 	/**
-	 * loadMorph method.
+	 * Load a set of relationships onto the mixed relationship models.
 	 *
-	 * @param {any} relation
-	 * @param {any} relations
-	 * @returns {any}
+	 * @param relation - Relationship name.
+	 * @param relations - Dictionary of relations to load.
+	 * @returns Fluent self instance.
 	 */
-	loadMorph($relation: any, $relations: any) {
-		this.getCollection().loadMorph($relation, $relations);
+	loadMorph($relation: any, $relations: any): this {
+		(this.getCollection() as any).loadMorph($relation, $relations);
 
 		return this;
 	}
 
 	/**
-	 * loadMorphCount method.
+	 * Load a count of relationships onto the mixed relationship models.
 	 *
-	 * @param {any} relation
-	 * @param {any} relations
-	 * @returns {any}
+	 * @param relation - Relationship name.
+	 * @param relations - Dictionary of relations to load counts for.
+	 * @returns Fluent self instance.
 	 */
-	loadMorphCount($relation: any, $relations: any) {
-		this.getCollection().loadMorphCount($relation, $relations);
+	loadMorphCount($relation: any, $relations: any): this {
+		(this.getCollection() as any).loadMorphCount($relation, $relations);
 
 		return this;
 	}
 
 	/**
-	 * items method.
+	 * Get the slice of items being paginated.
 	 *
-	 * @returns {any}
+	 * @returns Array of paginated items.
 	 */
-	items() {
+	items(): T[] {
 		return this.$items.all();
 	}
 
 	/**
-	 * firstItem method.
+	 * Get the number of the first item in the slice.
 	 *
-	 * @returns {any}
+	 * @returns First item number or null.
 	 */
-	firstItem() {
+	firstItem(): number | null {
 		return this.count() > 0 ? (this.$currentPage - 1) * this.$perPage + 1 : null;
 	}
 
 	/**
-	 * lastItem method.
+	 * Get the number of the last item in the slice.
 	 *
-	 * @returns {any}
+	 * @returns Last item number or null.
 	 */
-	lastItem() {
-		return this.count() > 0 ? this.firstItem() + this.count() - 1 : null;
+	lastItem(): number | null {
+		return this.count() > 0 ? this.firstItem()! + this.count() - 1 : null;
 	}
 
 	/**
-	 * through method.
+	 * Transform each item in the slice of items using a callback.
 	 *
-	 * @param {any} callback
-	 * @returns {any}
+	 * @param callback - Transformation callback.
+	 * @returns Fluent self instance.
 	 */
-	through($callback: Function) {
+	through($callback: (item: T, key?: any) => any): this {
 		this.$items = this.$items.map($callback);
 
 		return this;
 	}
 
 	/**
-	 * perPage method.
+	 * Get the number of items shown per page.
 	 *
-	 * @returns {any}
+	 * @returns Per-page count.
 	 */
-	perPage() {
+	perPage(): number {
 		return this.$perPage;
 	}
 
 	/**
-	 * hasPages method.
+	 * Determine if there are enough items to split into multiple pages.
 	 *
-	 * @returns {any}
+	 * @returns True if multiple pages exist.
 	 */
-	hasPages() {
+	hasPages(): boolean {
 		return this.currentPage() != 1 || this.hasMorePages();
 	}
 
 	/**
-	 * onFirstPage method.
+	 * Determine if the paginator is on the first page.
 	 *
-	 * @returns {any}
+	 * @returns True if on first page.
 	 */
-	onFirstPage() {
+	onFirstPage(): boolean {
 		return this.currentPage() <= 1;
 	}
 
 	/**
-	 * onLastPage method.
+	 * Determine if the paginator is on the last page.
 	 *
-	 * @returns {any}
+	 * @returns True if on last page.
 	 */
-	onLastPage() {
+	onLastPage(): boolean {
 		return !this.hasMorePages();
 	}
 
 	/**
-	 * currentPage method.
+	 * Get the current page.
 	 *
-	 * @returns {any}
+	 * @returns Current page number.
 	 */
-	currentPage() {
+	currentPage(): number {
 		return this.$currentPage;
 	}
 
 	/**
-	 * getPageName method.
+	 * Get the query string variable used to store the page.
 	 *
-	 * @returns {any}
+	 * @returns Page query parameter name.
 	 */
-	getPageName() {
+	getPageName(): string {
 		return this.$pageName;
 	}
 
 	/**
-	 * setPageName method.
+	 * Set the query string variable used to store the page.
 	 *
-	 * @param {any} name
-	 * @returns {any}
+	 * @param name - Page query parameter name.
+	 * @returns Fluent self instance.
 	 */
-	setPageName($name: string) {
+	setPageName($name: string): this {
 		this.$pageName = $name;
 
 		return this;
 	}
 
 	/**
-	 * withPath method.
+	 * Set the base path for incoming request URIs.
 	 *
-	 * @param {any} path
-	 * @returns {any}
+	 * @param path - Base path.
+	 * @returns Fluent self instance.
 	 */
-	withPath($path: string) {
+	withPath($path: string): this {
 		return this.setPath($path);
 	}
 
 	/**
-	 * setPath method.
+	 * Set the base path for incoming request URIs.
 	 *
-	 * @param {any} path
-	 * @returns {any}
+	 * @param path - Base path.
+	 * @returns Fluent self instance.
 	 */
-	setPath($path: string) {
+	setPath($path: string): this {
 		this.$path = $path;
 
 		return this;
 	}
 
 	/**
-	 * onEachSide method.
+	 * Set the number of links to display on each side of current page link.
 	 *
-	 * @param {any} count
-	 * @returns {any}
+	 * @param count - Link count.
+	 * @returns Fluent self instance.
 	 */
-	onEachSide($count: number) {
+	onEachSide($count: number): this {
 		this.$onEachSide = $count;
 
 		return this;
 	}
 
 	/**
-	 * path method.
+	 * Get the base path for incoming request URIs.
 	 *
-	 * @returns {any}
+	 * @returns Base path.
 	 */
-	path() {
+	path(): string {
 		return this.$path;
 	}
 
 	/**
-	 * resolveCurrentPath method.
+	 * Resolve the current request path or return default.
 	 *
-	 * @param {any} default
-	 * @returns {any}
+	 * @param defaultPath - Default fallback path.
+	 * @returns Resolved path.
 	 */
-	resolveCurrentPath($default: string = '/') {
+	resolveCurrentPath($default: string = '/'): string {
 		if (!this.$request) return $default;
 		if (typeof this.$request.url === 'function') return this.$request.url();
 		if (typeof this.$request.url === 'string') return this.$request.url;
@@ -436,13 +441,13 @@ class AbstractPaginator extends Macroable implements IPaginator {
 	}
 
 	/**
-	 * resolveCurrentPage method.
+	 * Resolve the current page or return the default value.
 	 *
-	 * @param {any} pageName
-	 * @param {any} default
-	 * @returns {any}
+	 * @param pageName - Page parameter name.
+	 * @param defaultPage - Fallback page number.
+	 * @returns Resolved page number.
 	 */
-	resolveCurrentPage($pageName: string = 'page', $default: number = 1) {
+	resolveCurrentPage($pageName: string = 'page', $default: number = 1): number {
 		const page = (this.$request && typeof this.$request.input === 'function') ? this.$request.input($pageName) : null;
 		const parsedPage = parseInt(page, 10);
 		if (!isNaN(parsedPage) && Number.isInteger(parsedPage) && parsedPage >= 1) {
@@ -452,273 +457,258 @@ class AbstractPaginator extends Macroable implements IPaginator {
 	}
 
 	/**
-	 * resolveQueryString method.
+	 * Resolve the query string or return the default value.
 	 *
-	 * @param {any} default
-	 * @returns {any}
+	 * @param defaultQuery - Fallback query string/object.
+	 * @returns Resolved query string/object.
 	 */
-	resolveQueryString($default: any = null) {
+	resolveQueryString($default: any = null): any {
 		return (this.$request && typeof this.$request.getQuery === 'function') ? this.$request.getQuery() : $default;
 	}
 
 	/**
-	 * viewFactory method.
+	 * Get the view factory instance.
 	 *
-	 * @returns {any}
+	 * @returns View factory instance.
 	 */
-	viewFactory() {
-		return this.constructor.viewFactory();
-	}
-
-	get $defaultView() {
-		return this.constructor.$defaultView;
-	}
-
-	get $defaultSimpleView() {
-		return this.constructor.$defaultSimpleView;
+	viewFactory(): any {
+		return (this.constructor as typeof AbstractPaginator).viewFactory();
 	}
 
 	/**
-	 * viewFactory method.
-	 *
-	 * @static
-	 * @returns {any}
+	 * Get the default view name.
 	 */
-	static viewFactory() {
-		return this.$viewFactoryResolver();
+	get $defaultView(): string {
+		return (this.constructor as typeof AbstractPaginator).$defaultView;
 	}
 
 	/**
-	 * viewFactoryResolver method.
-	 *
-	 * @static
-	 * @param {any} resolver
-	 * @returns {any}
+	 * Get the default simple view name.
 	 */
-	static viewFactoryResolver($resolver: any) {
+	get $defaultSimpleView(): string {
+		return (this.constructor as typeof AbstractPaginator).$defaultSimpleView;
+	}
+
+	/**
+	 * Get the view factory instance from resolver.
+	 *
+	 * @returns Resolved view factory.
+	 */
+	static viewFactory(): any {
+		return (this.$viewFactoryResolver as Function)();
+	}
+
+	/**
+	 * Set a callback to provide the view factory.
+	 *
+	 * @param resolver - Factory resolver function.
+	 */
+	static viewFactoryResolver($resolver: any): void {
 		this.$viewFactoryResolver = $resolver;
 	}
 
 	/**
-	 * defaultView method.
+	 * Set the default pagination view.
 	 *
-	 * @static
-	 * @param {any} view
-	 * @returns {any}
+	 * @param view - View name.
 	 */
-	static defaultView($view: any) {
+	static defaultView($view: string): void {
 		this.$defaultView = $view;
 	}
 
 	/**
-	 * defaultSimpleView method.
+	 * Set the default simple pagination view.
 	 *
-	 * @static
-	 * @param {any} view
-	 * @returns {any}
+	 * @param view - View name.
 	 */
-	static defaultSimpleView($view: any) {
+	static defaultSimpleView($view: string): void {
 		this.$defaultSimpleView = $view;
 	}
 
 	/**
-	 * useTailwind method.
-	 *
-	 * @static
-	 * @returns {any}
+	 * Indicate that Tailwind styling should be used for generated links.
 	 */
-	static useTailwind() {
+	static useTailwind(): void {
 		this.defaultView('pagination::tailwind');
 		this.defaultSimpleView('pagination::simple-tailwind');
 	}
 
 	/**
-	 * useBootstrap method.
-	 *
-	 * @static
-	 * @returns {any}
+	 * Indicate that Bootstrap styling should be used for generated links.
 	 */
-	static useBootstrap() {
+	static useBootstrap(): void {
 		this.useBootstrapFour();
 	}
 
-
 	/**
-	 * useBootstrapThree method.
-	 *
-	 * @static
-	 * @returns {any}
+	 * Indicate that Bootstrap 3 styling should be used for generated links.
 	 */
-	static useBootstrapThree() {
+	static useBootstrapThree(): void {
 		this.defaultView('pagination::default');
 		this.defaultSimpleView('pagination::simple-default');
 	}
 
 	/**
-	 * useBootstrapFour method.
-	 *
-	 * @static
-	 * @returns {any}
+	 * Indicate that Bootstrap 4 styling should be used for generated links.
 	 */
-	static useBootstrapFour() {
+	static useBootstrapFour(): void {
 		this.defaultView('pagination::bootstrap-4');
 		this.defaultSimpleView('pagination::simple-bootstrap-4');
 	}
 
 	/**
-	 * useBootstrapFive method.
-	 *
-	 * @static
-	 * @returns {any}
+	 * Indicate that Bootstrap 5 styling should be used for generated links.
 	 */
-	static useBootstrapFive() {
+	static useBootstrapFive(): void {
 		this.defaultView('pagination::bootstrap-5');
 		this.defaultSimpleView('pagination::simple-bootstrap-5');
 	}
 
 	/**
-	 * getIterator method.
+	 * Get an iterator for the items.
 	 *
-	 * @returns {any}
+	 * @returns Iterator.
 	 */
-	getIterator() {
-		return typeof this.$items.getIterator === 'function'
-			? this.$items.getIterator()
-			: this.$items[Symbol.iterator]();
+	getIterator(): Iterator<T> {
+		return typeof (this.$items as any).getIterator === 'function'
+			? (this.$items as any).getIterator()
+			: (this.$items as any)[Symbol.iterator]();
 	}
 
 	/**
-	 * isEmpty method.
+	 * Determine if the list of items is empty.
 	 *
-	 * @returns {any}
+	 * @returns True if empty.
 	 */
-	isEmpty() {
+	isEmpty(): boolean {
 		return this.count() === 0;
 	}
 
 	/**
-	 * isNotEmpty method.
+	 * Determine if the list of items is not empty.
 	 *
-	 * @returns {any}
+	 * @returns True if not empty.
 	 */
-	isNotEmpty() {
+	isNotEmpty(): boolean {
 		return this.count() > 0;
 	}
 
 	/**
-	 * count method.
+	 * Get the number of items for the current page.
 	 *
-	 * @returns {any}
+	 * @returns Item count.
 	 */
-	count() {
+	count(): number {
 		return this.$items.count();
 	}
 
 	/**
-	 * getCollection method.
+	 * Get the paginator's underlying collection.
 	 *
-	 * @returns {any}
+	 * @returns Collection instance.
 	 */
-	getCollection() {
+	getCollection(): Collection<T> {
 		return this.$items;
 	}
 
 	/**
-	 * setCollection method.
+	 * Set the paginator's underlying collection.
 	 *
-	 * @param {any} collection
-	 * @returns {any}
+	 * @param collection - Collection instance.
+	 * @returns Fluent self instance.
 	 */
-	setCollection($collection: any) {
+	setCollection($collection: Collection<T>): this {
 		this.$items = $collection;
 
 		return this;
 	}
 
 	/**
-	 * getOptions method.
+	 * Get the paginator options.
 	 *
-	 * @returns {any}
+	 * @returns Options dictionary.
 	 */
-	getOptions() {
+	getOptions(): Record<string, any> | undefined {
 		return this.$options;
 	}
 
 	/**
-	 * offsetExists method.
+	 * Determine if the given item exists.
 	 *
-	 * @param {any} key
-	 * @returns {any}
+	 * @param key - Item key.
+	 * @returns True if key exists.
 	 */
-	offsetExists($key: string) {
-		return this.$items.has($key);
+	offsetExists($key: any): boolean {
+		return (this.$items as any).has($key);
 	}
 
 	/**
-	 * offsetGet method.
+	 * Get the item at the given offset.
 	 *
-	 * @param {any} key
-	 * @returns {any}
+	 * @param key - Item key.
+	 * @returns Item value.
 	 */
-	offsetGet($key: string) {
-		const val = this.$items.get($key);
+	offsetGet($key: any): any {
+		const val = (this.$items as any).get($key);
 		return (val && typeof val.all === 'function') ? val.all() : val;
 	}
 
 	/**
-	 * offsetSet method.
+	 * Set the item at the given offset.
 	 *
-	 * @param {any} key
-	 * @param {any} value
-	 * @returns {any}
+	 * @param key - Item key.
+	 * @param value - Item value.
 	 */
-	offsetSet($key: string, $value: any) {
-		this.$items.put($key, $value);
+	offsetSet($key: any, $value: any): void {
+		(this.$items as any).put($key, $value);
 	}
 
 	/**
-	 * offsetUnset method.
+	 * Unset the item at the given offset.
 	 *
-	 * @param {any} key
-	 * @returns {any}
+	 * @param key - Item key.
 	 */
-	offsetUnset($key: string) {
-		if (Array.isArray(this.$items.$items)) {
-			this.$items.$items.splice($key, 1);
+	offsetUnset($key: any): void {
+		if (Array.isArray((this.$items as any).$items)) {
+			(this.$items as any).$items.splice($key, 1);
 		} else {
-			delete this.$items[$key];
+			delete (this.$items as any)[$key];
 		}
 	}
 
 	/**
-	 * toHtml method.
+	 * Render the contents of the paginator to HTML.
 	 *
-	 * @returns {any}
+	 * @returns Rendered HTML string.
 	 */
-	toHtml() {
+	toHtml(): string {
 		return String(this.render());
 	}
 
 	/**
-	 * __call method.
+	 * Dynamically handle calls into the paginator instance.
 	 *
-	 * @param {any} target
-	 * @param {any} method
-	 * @param {any} parameters
-	 * @returns {any}
+	 * @param target - Target instance.
+	 * @param method - Method name.
+	 * @param parameters - Method arguments.
+	 * @returns Call result.
 	 */
-	__call($target: any, $method: string, $parameters: any[]) {
+	__call($target: any, $method: string, $parameters: any[]): any {
 		return $target.getCollection()[$method](...$parameters);
 	}
 
 	/**
-	 * __toString method.
+	 * Render the contents of the paginator when evaluated as a string.
 	 *
-	 * @returns {any}
+	 * @returns Rendered string.
 	 */
-	__toString() {
+	__toString(): string {
 		return String(this.render());
 	}
 }
-export type { IPaginator, ILengthAwarePaginator };
-module.exports = AbstractPaginator;
+
+namespace AbstractPaginator {
+	export type { IPaginator, ILengthAwarePaginator };
+}
+
+export = AbstractPaginator;
