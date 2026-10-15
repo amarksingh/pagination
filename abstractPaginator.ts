@@ -94,7 +94,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} page
 	 * @returns {any}
 	 */
-	isValidPageNumber($page) {
+	isValidPageNumber($page: number) {
 		return $page >= 1 && Number.isInteger(parseInt($page)) !== false;
 	}
 
@@ -116,7 +116,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} end
 	 * @returns {any}
 	 */
-	getUrlRange($start, $end) {
+	getUrlRange($start: any, $end: any) {
 		return new Collection(range($start, $end)).mapWithKeys(($page) => {
 			return [$page, this.url($page)];
 		}).all();
@@ -128,7 +128,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} page
 	 * @returns {any}
 	 */
-	url($page) {
+	url($page: number) {
 		if ($page <= 0) {
 			$page = 1;
 		}
@@ -151,7 +151,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} fragment
 	 * @returns {any}
 	 */
-	fragment($fragment = null) {
+	fragment($fragment: any = null) {
 		if (is_null($fragment)) {
 			return this.$fragment;
 		}
@@ -168,7 +168,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} value
 	 * @returns {any}
 	 */
-	appends($key, $value = null) {
+	appends($key: string, $value: any = null) {
 		if (is_null($key)) {
 			return this;
 		}
@@ -186,7 +186,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} keys
 	 * @returns {any}
 	 */
-	appendObject($keys = {}) {
+	appendObject($keys: Record<string, any> = {}) {
 		for (const key in $keys) {
 			this.addQuery(key, $keys[key]);
 		}
@@ -210,7 +210,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} value
 	 * @returns {any}
 	 */
-	addQuery($key, $value) {
+	addQuery($key: string, $value: any) {
 		if ($key !== this.$pageName) {
 			this.$query[$key] = $value;
 		}
@@ -234,7 +234,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} relations
 	 * @returns {any}
 	 */
-	loadMorph($relation, $relations) {
+	loadMorph($relation: any, $relations: any) {
 		this.getCollection().loadMorph($relation, $relations);
 
 		return this;
@@ -247,7 +247,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} relations
 	 * @returns {any}
 	 */
-	loadMorphCount($relation, $relations) {
+	loadMorphCount($relation: any, $relations: any) {
 		this.getCollection().loadMorphCount($relation, $relations);
 
 		return this;
@@ -286,7 +286,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} callback
 	 * @returns {any}
 	 */
-	through($callback) {
+	through($callback: Function) {
 		this.$items = this.$items.map($callback);
 
 		return this;
@@ -352,7 +352,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} name
 	 * @returns {any}
 	 */
-	setPageName($name) {
+	setPageName($name: string) {
 		this.$pageName = $name;
 
 		return this;
@@ -364,7 +364,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} path
 	 * @returns {any}
 	 */
-	withPath($path) {
+	withPath($path: string) {
 		return this.setPath($path);
 	}
 
@@ -374,7 +374,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} path
 	 * @returns {any}
 	 */
-	setPath($path) {
+	setPath($path: string) {
 		this.$path = $path;
 
 		return this;
@@ -386,7 +386,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} count
 	 * @returns {any}
 	 */
-	onEachSide($count) {
+	onEachSide($count: number) {
 		this.$onEachSide = $count;
 
 		return this;
@@ -407,7 +407,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} default
 	 * @returns {any}
 	 */
-	resolveCurrentPath($default = '/') {
+	resolveCurrentPath($default: string = '/') {
 		if (!this.$request) return $default;
 		if (typeof this.$request.url === 'function') return this.$request.url();
 		if (typeof this.$request.url === 'string') return this.$request.url;
@@ -422,7 +422,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} default
 	 * @returns {any}
 	 */
-	resolveCurrentPage($pageName = 'page', $default = 1) {
+	resolveCurrentPage($pageName: string = 'page', $default: number = 1) {
 		const page = (this.$request && typeof this.$request.input === 'function') ? this.$request.input($pageName) : null;
 		const parsedPage = parseInt(page, 10);
 		if (!isNaN(parsedPage) && Number.isInteger(parsedPage) && parsedPage >= 1) {
@@ -437,7 +437,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} default
 	 * @returns {any}
 	 */
-	resolveQueryString($default = null) {
+	resolveQueryString($default: any = null) {
 		return (this.$request && typeof this.$request.getQuery === 'function') ? this.$request.getQuery() : $default;
 	}
 
@@ -475,7 +475,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} resolver
 	 * @returns {any}
 	 */
-	static viewFactoryResolver($resolver) {
+	static viewFactoryResolver($resolver: any) {
 		this.$viewFactoryResolver = $resolver;
 	}
 
@@ -486,7 +486,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} view
 	 * @returns {any}
 	 */
-	static defaultView($view) {
+	static defaultView($view: any) {
 		this.$defaultView = $view;
 	}
 
@@ -497,7 +497,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} view
 	 * @returns {any}
 	 */
-	static defaultSimpleView($view) {
+	static defaultSimpleView($view: any) {
 		this.$defaultSimpleView = $view;
 	}
 
@@ -609,7 +609,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} collection
 	 * @returns {any}
 	 */
-	setCollection($collection) {
+	setCollection($collection: any) {
 		this.$items = $collection;
 
 		return this;
@@ -630,7 +630,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} key
 	 * @returns {any}
 	 */
-	offsetExists($key) {
+	offsetExists($key: string) {
 		return this.$items.has($key);
 	}
 
@@ -640,7 +640,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} key
 	 * @returns {any}
 	 */
-	offsetGet($key) {
+	offsetGet($key: string) {
 		const val = this.$items.get($key);
 		return (val && typeof val.all === 'function') ? val.all() : val;
 	}
@@ -652,7 +652,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} value
 	 * @returns {any}
 	 */
-	offsetSet($key, $value) {
+	offsetSet($key: string, $value: any) {
 		this.$items.put($key, $value);
 	}
 
@@ -662,7 +662,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} key
 	 * @returns {any}
 	 */
-	offsetUnset($key) {
+	offsetUnset($key: string) {
 		if (Array.isArray(this.$items.$items)) {
 			this.$items.$items.splice($key, 1);
 		} else {
@@ -687,7 +687,7 @@ class AbstractPaginator extends Macroable {
 	 * @param {any} parameters
 	 * @returns {any}
 	 */
-	__call($target, $method, $parameters) {
+	__call($target: any, $method: string, $parameters: any[]) {
 		return $target.getCollection()[$method](...$parameters);
 	}
 

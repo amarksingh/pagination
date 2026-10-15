@@ -27,7 +27,7 @@ class LengthAwarePaginator extends AbstractPaginator {
 	 * @param {any} request
 	 * @returns {any}
 	 */
-	constructor($items, $total, $perPage, $currentPage = null, $options = {}, $request = {}) {
+	constructor($items: any[], $total: number, $perPage: number, $currentPage: any = null, $options: Record<string, any> = {}, $request: Record<string, any> = {}) {
 		super();
 		this.$options = $options;
 		this.$request = $request;
@@ -51,7 +51,7 @@ class LengthAwarePaginator extends AbstractPaginator {
 	 * @param {any} pageName
 	 * @returns {any}
 	 */
-	setCurrentPage($currentPage, $pageName) {
+	setCurrentPage($currentPage: any, $pageName: any) {
 		$currentPage = $currentPage || this.resolveCurrentPage($pageName);
 
 		return this.isValidPageNumber($currentPage) ? parseInt($currentPage) : 1;
@@ -64,7 +64,7 @@ class LengthAwarePaginator extends AbstractPaginator {
 	 * @param {any} data
 	 * @returns {any}
 	 */
-	links($view = null, $data = {}) {
+	links($view: any = null, $data: Record<string, any> = {}) {
 		return this.render($view, $data);
 	}
 
@@ -75,7 +75,7 @@ class LengthAwarePaginator extends AbstractPaginator {
 	 * @param {any} data
 	 * @returns {any}
 	 */
-	render($view = null, $data = {}) {
+	render($view: any = null, $data: Record<string, any> = {}) {
 		return this.viewFactory().make($view || this.$defaultView, Object.assign($data, {
 			'paginator': this,
 			'elements': this.elements(),

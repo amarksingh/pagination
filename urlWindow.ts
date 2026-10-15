@@ -13,7 +13,7 @@ class UrlWindow {
 	 * @param {any} paginator
 	 * @returns {any}
 	 */
-	constructor($paginator) {
+	constructor($paginator: any) {
 		this.$paginator = $paginator;
 	}
 
@@ -24,7 +24,7 @@ class UrlWindow {
 	 * @param {any} paginator
 	 * @returns {any}
 	 */
-	static make($paginator) {
+	static make($paginator: any) {
 		return (new this($paginator)).get();
 	}
 
@@ -62,7 +62,7 @@ class UrlWindow {
 	 * @param {any} onEachSide
 	 * @returns {any}
 	 */
-	getUrlSlider($onEachSide) {
+	getUrlSlider($onEachSide: any) {
 		const $window = $onEachSide + 4;
 
 		if (!this.hasPages()) {
@@ -88,7 +88,7 @@ class UrlWindow {
 	 * @param {any} onEachSide
 	 * @returns {any}
 	 */
-	getSliderTooCloseToBeginning($window, $onEachSide) {
+	getSliderTooCloseToBeginning($window: any, $onEachSide: any) {
 		return {
 			'first': this.$paginator.getUrlRange(1, $window + $onEachSide),
 			'slider': null,
@@ -103,7 +103,7 @@ class UrlWindow {
 	 * @param {any} onEachSide
 	 * @returns {any}
 	 */
-	getSliderTooCloseToEnding($window, $onEachSide) {
+	getSliderTooCloseToEnding($window: any, $onEachSide: any) {
 		const $last = this.$paginator.getUrlRange(
 			this.lastPage() - ($window + ($onEachSide - 1)),
 			this.lastPage()
@@ -122,7 +122,7 @@ class UrlWindow {
 	 * @param {any} onEachSide
 	 * @returns {any}
 	 */
-	getFullSlider($onEachSide) {
+	getFullSlider($onEachSide: any) {
 		return {
 			'first': this.getStart(),
 			'slider': this.getAdjacentUrlRange($onEachSide),
@@ -136,7 +136,7 @@ class UrlWindow {
 	 * @param {any} onEachSide
 	 * @returns {any}
 	 */
-	getAdjacentUrlRange($onEachSide) {
+	getAdjacentUrlRange($onEachSide: any) {
 		return this.$paginator.getUrlRange(
 			this.currentPage() - $onEachSide,
 			this.currentPage() + $onEachSide

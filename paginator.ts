@@ -20,7 +20,7 @@ class Paginator extends AbstractPaginator {
 	 * @param {any} request
 	 * @returns {any}
 	 */
-	constructor($items, $perPage, $currentPage = null, $options = {}, $request = {}) {
+	constructor($items: any[], $perPage: number, $currentPage: any = null, $options: Record<string, any> = {}, $request: Record<string, any> = {}) {
 		super();
 		this.$options = $options;
 		this.$request = $request;
@@ -41,7 +41,7 @@ class Paginator extends AbstractPaginator {
 	 * @param {any} currentPage
 	 * @returns {any}
 	 */
-	setCurrentPage($currentPage) {
+	setCurrentPage($currentPage: any) {
 		$currentPage = $currentPage || this.resolveCurrentPage();
 
 		return this.isValidPageNumber($currentPage) ? parseInt($currentPage) : 1;
@@ -53,7 +53,7 @@ class Paginator extends AbstractPaginator {
 	 * @param {any} items
 	 * @returns {any}
 	 */
-	setItems($items) {
+	setItems($items: any[]) {
 		this.$items = $items instanceof Collection ? $items : Collection.make($items);
 
 		this.$hasMore = this.$items.count() > this.$perPage;
@@ -90,7 +90,7 @@ class Paginator extends AbstractPaginator {
 	 * @param {any} data
 	 * @returns {any}
 	 */
-	links($view = null, $data = {}) {
+	links($view: any = null, $data: Record<string, any> = {}) {
 		return this.render($view, $data);
 	}
 
@@ -101,7 +101,7 @@ class Paginator extends AbstractPaginator {
 	 * @param {any} data
 	 * @returns {any}
 	 */
-	render($view = null, $data = {}) {
+	render($view: any = null, $data: Record<string, any> = {}) {
 		return this.viewFactory().make($view || this.$defaultSimpleView, Object.assign($data, {
 			'paginator': this,
 		}));
@@ -113,7 +113,7 @@ class Paginator extends AbstractPaginator {
 	 * @param {any} hasMore
 	 * @returns {any}
 	 */
-	hasMorePagesWhen($hasMore = true) {
+	hasMorePagesWhen($hasMore: boolean = true) {
 		this.$hasMore = $hasMore;
 
 		return this;
