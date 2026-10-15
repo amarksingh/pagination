@@ -4,10 +4,29 @@ const UrlWindow = require('./urlWindow');
 const { is_object, rtrim } = require('@ostro/support/function');
 class LengthAwarePaginator extends AbstractPaginator {
 
+	/**
+	 * $total property.
+	 * @type {any}
+	 */
 	$total;
 
+	/**
+	 * $lastPage property.
+	 * @type {any}
+	 */
 	$lastPage;
 
+	/**
+	 * constructor method.
+	 *
+	 * @param {any} items
+	 * @param {any} total
+	 * @param {any} perPage
+	 * @param {any} currentPage
+	 * @param {any} options
+	 * @param {any} request
+	 * @returns {any}
+	 */
 	constructor($items, $total, $perPage, $currentPage = null, $options = {}, $request = {}) {
 		super();
 		this.$options = $options;
@@ -25,16 +44,37 @@ class LengthAwarePaginator extends AbstractPaginator {
 		this.$items = $items instanceof Collection ? $items : Collection.make($items);
 	}
 
+	/**
+	 * setCurrentPage method.
+	 *
+	 * @param {any} currentPage
+	 * @param {any} pageName
+	 * @returns {any}
+	 */
 	setCurrentPage($currentPage, $pageName) {
 		$currentPage = $currentPage || this.resolveCurrentPage($pageName);
 
 		return this.isValidPageNumber($currentPage) ? parseInt($currentPage) : 1;
 	}
 
+	/**
+	 * links method.
+	 *
+	 * @param {any} view
+	 * @param {any} data
+	 * @returns {any}
+	 */
 	links($view = null, $data = {}) {
 		return this.render($view, $data);
 	}
 
+	/**
+	 * render method.
+	 *
+	 * @param {any} view
+	 * @param {any} data
+	 * @returns {any}
+	 */
 	render($view = null, $data = {}) {
 		return this.viewFactory().make($view || this.$defaultView, Object.assign($data, {
 			'paginator': this,
@@ -42,6 +82,11 @@ class LengthAwarePaginator extends AbstractPaginator {
 		}));
 	}
 
+	/**
+	 * linkCollection method.
+	 *
+	 * @returns {any}
+	 */
 	linkCollection() {
 		return new Collection(this.elements()).flatMap(($item) => {
 			if (typeof ($item) != 'object') {
@@ -49,6 +94,10 @@ class LengthAwarePaginator extends AbstractPaginator {
 			}
 			let pages = [];
 			for (let $page in $item) {
+				/**
+				 * $page property.
+				 * @type {any}
+				 */
 				$page = parseInt($page);
 				pages.push({
 					'url': $item[$page],
@@ -68,6 +117,11 @@ class LengthAwarePaginator extends AbstractPaginator {
 		});
 	}
 
+	/**
+	 * elements method.
+	 *
+	 * @returns {any}
+	 */
 	elements() {
 		const window = UrlWindow.make(this);
 
@@ -78,34 +132,69 @@ class LengthAwarePaginator extends AbstractPaginator {
 		].filter(element => element !== null);
 	}
 
+	/**
+	 * total method.
+	 *
+	 * @returns {any}
+	 */
 	total() {
 		return this.$total;
 	}
 
+	/**
+	 * hasMorePages method.
+	 *
+	 * @returns {any}
+	 */
 	hasMorePages() {
 		return this.currentPage() < this.lastPage();
 	}
 
+	/**
+	 * nextPageUrl method.
+	 *
+	 * @returns {any}
+	 */
 	nextPageUrl() {
 		if (this.hasMorePages()) {
 			return this.url(this.currentPage() + 1);
 		}
 	}
 
+	/**
+	 * nextPage method.
+	 *
+	 * @returns {any}
+	 */
 	nextPage() {
 		if (this.hasMorePages()) {
 			return this.currentPage() + 1;
 		}
 	}
 
+	/**
+	 * lastPage method.
+	 *
+	 * @returns {any}
+	 */
 	lastPage() {
 		return this.$lastPage;
 	}
 
+	/**
+	 * toJSON method.
+	 *
+	 * @returns {any}
+	 */
 	toJSON() {
 		return this.toJson();
 	}
 
+	/**
+	 * toJson method.
+	 *
+	 * @returns {any}
+	 */
 	toJson() {
 		return {
 			'current_page': this.currentPage(),
@@ -124,6 +213,11 @@ class LengthAwarePaginator extends AbstractPaginator {
 		};
 	}
 
+	/**
+	 * jsonSerialize method.
+	 *
+	 * @returns {any}
+	 */
 	jsonSerialize() {
 		return this.toJson();
 	}

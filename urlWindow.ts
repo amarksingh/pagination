@@ -1,16 +1,38 @@
 
 class UrlWindow {
 
+	/**
+	 * $paginator property.
+	 * @type {any}
+	 */
 	$paginator;
 
+	/**
+	 * constructor method.
+	 *
+	 * @param {any} paginator
+	 * @returns {any}
+	 */
 	constructor($paginator) {
 		this.$paginator = $paginator;
 	}
 
+	/**
+	 * make method.
+	 *
+	 * @static
+	 * @param {any} paginator
+	 * @returns {any}
+	 */
 	static make($paginator) {
 		return (new this($paginator)).get();
 	}
 
+	/**
+	 * get method.
+	 *
+	 * @returns {any}
+	 */
 	get() {
 		const $onEachSide = this.$paginator.$onEachSide;
 
@@ -21,6 +43,11 @@ class UrlWindow {
 		return this.getUrlSlider($onEachSide);
 	}
 
+	/**
+	 * getSmallSlider method.
+	 *
+	 * @returns {any}
+	 */
 	getSmallSlider() {
 		return {
 			'first': this.$paginator.getUrlRange(1, this.lastPage()),
@@ -29,6 +56,12 @@ class UrlWindow {
 		};
 	}
 
+	/**
+	 * getUrlSlider method.
+	 *
+	 * @param {any} onEachSide
+	 * @returns {any}
+	 */
 	getUrlSlider($onEachSide) {
 		const $window = $onEachSide + 4;
 
@@ -48,6 +81,13 @@ class UrlWindow {
 		return this.getFullSlider($onEachSide);
 	}
 
+	/**
+	 * getSliderTooCloseToBeginning method.
+	 *
+	 * @param {any} window
+	 * @param {any} onEachSide
+	 * @returns {any}
+	 */
 	getSliderTooCloseToBeginning($window, $onEachSide) {
 		return {
 			'first': this.$paginator.getUrlRange(1, $window + $onEachSide),
@@ -56,6 +96,13 @@ class UrlWindow {
 		};
 	}
 
+	/**
+	 * getSliderTooCloseToEnding method.
+	 *
+	 * @param {any} window
+	 * @param {any} onEachSide
+	 * @returns {any}
+	 */
 	getSliderTooCloseToEnding($window, $onEachSide) {
 		const $last = this.$paginator.getUrlRange(
 			this.lastPage() - ($window + ($onEachSide - 1)),
@@ -69,6 +116,12 @@ class UrlWindow {
 		};
 	}
 
+	/**
+	 * getFullSlider method.
+	 *
+	 * @param {any} onEachSide
+	 * @returns {any}
+	 */
 	getFullSlider($onEachSide) {
 		return {
 			'first': this.getStart(),
@@ -77,6 +130,12 @@ class UrlWindow {
 		};
 	}
 
+	/**
+	 * getAdjacentUrlRange method.
+	 *
+	 * @param {any} onEachSide
+	 * @returns {any}
+	 */
 	getAdjacentUrlRange($onEachSide) {
 		return this.$paginator.getUrlRange(
 			this.currentPage() - $onEachSide,
@@ -84,11 +143,21 @@ class UrlWindow {
 		);
 	}
 
+	/**
+	 * getStart method.
+	 *
+	 * @returns {any}
+	 */
 	getStart() {
 		return this.$paginator.getUrlRange(1, 2);
 	}
 
 
+	/**
+	 * getFinish method.
+	 *
+	 * @returns {any}
+	 */
 	getFinish() {
 		return this.$paginator.getUrlRange(
 			this.lastPage() - 1,
@@ -96,14 +165,29 @@ class UrlWindow {
 		);
 	}
 
+	/**
+	 * hasPages method.
+	 *
+	 * @returns {any}
+	 */
 	hasPages() {
 		return this.$paginator.lastPage() > 1;
 	}
 
+	/**
+	 * currentPage method.
+	 *
+	 * @returns {any}
+	 */
 	currentPage() {
 		return this.$paginator.currentPage();
 	}
 
+	/**
+	 * lastPage method.
+	 *
+	 * @returns {any}
+	 */
 	lastPage() {
 		return this.$paginator.lastPage();
 	}

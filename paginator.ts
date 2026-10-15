@@ -4,8 +4,22 @@ const Collection = require('@ostro/support/collection');
 const { rtrim } = require('@ostro/support/function')
 class Paginator extends AbstractPaginator {
 
+	/**
+	 * $hasMore property.
+	 * @type {any}
+	 */
 	$hasMore;
 
+	/**
+	 * constructor method.
+	 *
+	 * @param {any} items
+	 * @param {any} perPage
+	 * @param {any} currentPage
+	 * @param {any} options
+	 * @param {any} request
+	 * @returns {any}
+	 */
 	constructor($items, $perPage, $currentPage = null, $options = {}, $request = {}) {
 		super();
 		this.$options = $options;
@@ -21,12 +35,24 @@ class Paginator extends AbstractPaginator {
 		this.setItems($items);
 	}
 
+	/**
+	 * setCurrentPage method.
+	 *
+	 * @param {any} currentPage
+	 * @returns {any}
+	 */
 	setCurrentPage($currentPage) {
 		$currentPage = $currentPage || this.resolveCurrentPage();
 
 		return this.isValidPageNumber($currentPage) ? parseInt($currentPage) : 1;
 	}
 
+	/**
+	 * setItems method.
+	 *
+	 * @param {any} items
+	 * @returns {any}
+	 */
 	setItems($items) {
 		this.$items = $items instanceof Collection ? $items : Collection.make($items);
 
@@ -35,38 +61,78 @@ class Paginator extends AbstractPaginator {
 		this.$items = this.$items.slice(0, this.$perPage);
 	}
 
+	/**
+	 * nextPageUrl method.
+	 *
+	 * @returns {any}
+	 */
 	nextPageUrl() {
 		if (this.hasMorePages()) {
 			return this.url(this.currentPage() + 1);
 		}
 	}
 
+	/**
+	 * nextPage method.
+	 *
+	 * @returns {any}
+	 */
 	nextPage() {
 		if (this.hasMorePages()) {
 			return this.currentPage() + 1;
 		}
 	}
 
+	/**
+	 * links method.
+	 *
+	 * @param {any} view
+	 * @param {any} data
+	 * @returns {any}
+	 */
 	links($view = null, $data = {}) {
 		return this.render($view, $data);
 	}
 
+	/**
+	 * render method.
+	 *
+	 * @param {any} view
+	 * @param {any} data
+	 * @returns {any}
+	 */
 	render($view = null, $data = {}) {
 		return this.viewFactory().make($view || this.$defaultSimpleView, Object.assign($data, {
 			'paginator': this,
 		}));
 	}
 
+	/**
+	 * hasMorePagesWhen method.
+	 *
+	 * @param {any} hasMore
+	 * @returns {any}
+	 */
 	hasMorePagesWhen($hasMore = true) {
 		this.$hasMore = $hasMore;
 
 		return this;
 	}
 
+	/**
+	 * hasMorePages method.
+	 *
+	 * @returns {any}
+	 */
 	hasMorePages() {
 		return this.$hasMore;
 	}
 
+	/**
+	 * toJson method.
+	 *
+	 * @returns {any}
+	 */
 	toJson() {
 		return {
 			'current_page': this.currentPage(),
@@ -81,6 +147,11 @@ class Paginator extends AbstractPaginator {
 		};
 	}
 
+	/**
+	 * jsonSerialize method.
+	 *
+	 * @returns {any}
+	 */
 	jsonSerialize() {
 		return this.toJson();
 	}
