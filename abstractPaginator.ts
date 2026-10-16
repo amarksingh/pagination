@@ -110,8 +110,13 @@ class AbstractPaginator<T = unknown> extends Macroable implements IPaginator<T> 
 	 */
 	static $defaultSimpleView: string = 'pagination::simple-tailwind';
 
-	declare hasMorePages: () => boolean;
-	declare render: ($view?: string | null, $data?: Record<string, any>) => any;
+	hasMorePages(): boolean {
+		return false;
+	}
+
+	render($view?: string | null, $data?: Record<string, any>): any {
+		return '';
+	}
 
 	/**
 	 * Determine if the given value is a valid page number.
@@ -707,8 +712,5 @@ class AbstractPaginator<T = unknown> extends Macroable implements IPaginator<T> 
 	}
 }
 
-namespace AbstractPaginator {
-	export type { IPaginator, ILengthAwarePaginator };
-}
-
+export type { IPaginator, ILengthAwarePaginator };
 export default AbstractPaginator;

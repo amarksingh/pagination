@@ -1,4 +1,4 @@
-import AbstractPaginator from './abstractPaginator';
+import AbstractPaginator, { type ILengthAwarePaginator } from './abstractPaginator';
 import Collection from '@ostro/support/collection';
 import UrlWindow from './urlWindow';
 import { is_object, rtrim } from '@ostro/support/function';
@@ -8,7 +8,7 @@ import { is_object, rtrim } from '@ostro/support/function';
  *
  * @typeParam T - Type of items being paginated.
  */
-class LengthAwarePaginator<T = unknown> extends AbstractPaginator<T> implements AbstractPaginator.ILengthAwarePaginator<T> {
+class LengthAwarePaginator<T = unknown> extends AbstractPaginator<T> implements ILengthAwarePaginator<T> {
 
 	/**
 	 * Total number of items in the data source.
