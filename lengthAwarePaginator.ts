@@ -230,4 +230,4 @@ class LengthAwarePaginator<T = unknown> extends AbstractPaginator<T> implements 
 
 }
 
-export = LengthAwarePaginator;
+export default LengthAwarePaginator;

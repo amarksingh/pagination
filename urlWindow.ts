@@ -188,4 +188,4 @@ class UrlWindow {
 	}
 }
 
-export = UrlWindow;
+export default UrlWindow;

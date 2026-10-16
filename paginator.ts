@@ -165,4 +165,4 @@ class Paginator<T = unknown> extends AbstractPaginator<T> {
 	}
 }
 
-export = Paginator;
+export default Paginator;

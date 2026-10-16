@@ -711,4 +711,4 @@ namespace AbstractPaginator {
 	export type { IPaginator, ILengthAwarePaginator };
 }
 
-export = AbstractPaginator;
+export default AbstractPaginator;
