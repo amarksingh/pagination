@@ -3,25 +3,7 @@ import { count, is_null, is_object, range } from '@ostro/support/function';
 import Collection from '@ostro/support/collection';
 import { Macroable } from '@ostro/support/macro';
 
-interface IPaginator<T = unknown> {
-	items(): T[];
-	count(): number;
-	currentPage(): number;
-	perPage(): number;
-	hasPages(): boolean;
-	hasMorePages(): boolean;
-	path(): string;
-	url(page: number): string;
-	fragment(fragment?: string): this | string | null | undefined;
-	appends(key: any, value?: any): this;
-}
-
-interface ILengthAwarePaginator<T = unknown> extends IPaginator<T> {
-	total(): number;
-	lastPage(): number;
-	firstItem(): number | null;
-	lastItem(): number | null;
-}
+import type { IPaginator, ILengthAwarePaginator } from '@ostro/contracts/pagination/paginator';
 
 /**
  * Abstract base class providing core pagination mechanics.

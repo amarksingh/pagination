@@ -23,6 +23,7 @@
     "test": "npx c8 npx jest"
   },
   "dependencies": {
+    "@ostro/contracts": "^2.0.0-alpha.1",
     "@ostro/support": "^2.0.0-alpha.1"
   },
   "engines": {
@@ -44,7 +45,7 @@
   },
   "homepage": "https://github.com/ostrojs/pagination#readme",
   "devDependencies": {
-    "typescript": "^5.8.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
   }
 }
