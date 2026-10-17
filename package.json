@@ -42,5 +42,9 @@
   "bugs": {
     "url": "https://github.com/ostrojs/pagination/issues"
   },
-  "homepage": "https://github.com/ostrojs/pagination#readme"
+  "homepage": "https://github.com/ostrojs/pagination#readme",
+  "devDependencies": {
+    "typescript": "^5.8.0",
+    "@types/node": "^22.0.0"
+  }
 }
