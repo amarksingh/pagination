@@ -15,8 +15,12 @@ module.exports = {
         ]
     },
     "moduleNameMapper": {
-        "^@ostro/support/(.*)$": "<rootDir>/../support/$1",
-        "^@ostro/support$": "<rootDir>/../support"
+        "^@ostro/support/(.*)$": "<rootDir>/../support/src/$1",
+        "^@ostro/support$": "<rootDir>/../support/src",
+        "^@ostro/contracts/(.*)$": "<rootDir>/../contracts/src/$1",
+        "^@ostro/contracts$": "<rootDir>/../contracts/src",
+        "^@ostro/pagination/(.*)$": "<rootDir>/src/$1",
+        "^@ostro/pagination$": "<rootDir>/src/paginator"
     },
     "collectCoverage": true,
     "coverageDirectory": "coverage",
@@ -26,10 +30,11 @@ module.exports = {
         "clover"
     ],
     "collectCoverageFrom": [
-        "<rootDir>/**/*.ts",
+        "<rootDir>/src/**/*.ts",
         "!<rootDir>/node_modules/**",
         "!<rootDir>/test/**",
         "!<rootDir>/coverage/**",
+        "!<rootDir>/build/**",
         "!<rootDir>/jest.config.js"
     ]
 };

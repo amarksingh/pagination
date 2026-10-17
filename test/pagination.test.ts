@@ -1,8 +1,8 @@
 import '@ostro/support/helpers';
-import AbstractPaginator from '../abstractPaginator';
-import LengthAwarePaginator from '../lengthAwarePaginator';
-import Paginator from '../paginator';
-import UrlWindow from '../urlWindow';
+import AbstractPaginator from '../src/abstractPaginator';
+import LengthAwarePaginator from '../src/lengthAwarePaginator';
+import Paginator from '../src/paginator';
+import UrlWindow from '../src/urlWindow';
 import Collection from '@ostro/support/collection';
 
 describe('@ostro/pagination', () => {
