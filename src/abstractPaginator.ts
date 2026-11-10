@@ -3,6 +3,7 @@ import { count, is_null, is_object, range } from '@ostro/support/function';
 import Collection from '@ostro/support/collection';
 import { Macroable } from '@ostro/support/macro';
 import type { ICollection } from '@ostro/contracts/collection/collect';
+import type { IHttpRequest } from '@ostro/contracts/http/request';
 
 import type { IPaginator, ILengthAwarePaginator } from '@ostro/contracts/pagination/paginator';
 
@@ -61,7 +62,7 @@ class AbstractPaginator<T = unknown> extends Macroable implements IPaginator<T> 
 	/**
 	 * Incoming HTTP request instance.
 	 */
-	$request?: any;
+	$request?: IHttpRequest;
 
 	/**
 	 * Custom current path resolver callback.
@@ -422,10 +423,7 @@ class AbstractPaginator<T = unknown> extends Macroable implements IPaginator<T> 
 	 */
 	resolveCurrentPath($default: string = '/'): string {
 		if (!this.$request) return $default;
-		if (typeof this.$request.url === 'function') return this.$request.url();
-		if (typeof this.$request.url === 'string') return this.$request.url;
-		if (typeof this.$request.path === 'function') return this.$request.path();
-		return $default;
+		return (this.$request.url ? this.$request.url() : this.$request.path?.()) || $default;
 	}
 
 	/**
@@ -436,7 +434,7 @@ class AbstractPaginator<T = unknown> extends Macroable implements IPaginator<T> 
 	 * @returns Resolved page number.
 	 */
 	resolveCurrentPage($pageName: string = 'page', $default: number = 1): number {
-		const page = (this.$request && typeof this.$request.input === 'function') ? this.$request.input($pageName) : null;
+		const page = this.$request?.input?.($pageName);
 		const parsedPage = parseInt(page, 10);
 		if (!isNaN(parsedPage) && Number.isInteger(parsedPage) && parsedPage >= 1) {
 			return parsedPage;
@@ -451,7 +449,8 @@ class AbstractPaginator<T = unknown> extends Macroable implements IPaginator<T> 
 	 * @returns Resolved query string/object.
 	 */
 	resolveQueryString($default: any = null): any {
-		return (this.$request && typeof this.$request.getQuery === 'function') ? this.$request.getQuery() : $default;
+		const query = this.$request?.getQuery?.();
+		return query !== undefined ? query : $default;
 	}
 
 	/**
