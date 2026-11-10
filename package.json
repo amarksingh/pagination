@@ -1,6 +1,6 @@
 {
     "name": "@ostro/pagination",
-    "version": "2.0.0-alpha.3",
+    "version": "2.0.0-alpha.4",
     "description": "Pagination module for OstroJS",
     "main": "lengthAwarePaginator.js",
     "types": ".typed/lengthAwarePaginator.d.ts",
